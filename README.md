@@ -26,6 +26,10 @@ Para garantir escalabilidade, segurança e acessibilidade para equipes distribu�
 * **Segurança e Integridade:** Aplicação rigorosa de restrições de chaves primárias (PK), chaves estrangeiras (FK) e integridade referencial para evitar duplicidade ou corrupção de dados históricos.
 * **Evolução de Arquitetura:** Modelagem lógica escalável documentada, prevendo uma futura migração nativa para ambientes corporativos mais robustos (como Microsoft SQL Server) à medida que o volume de registros de RH se expandir.
 
+<p align="center">
+  <img src="./images/Projest-Modelo conceitual.jpg" alt="Diagrama Entidade Relacionamento - Projest" width="850">
+</p>
+
 ---
 
 ## 📊 MODELAGEM CONCEITUAL E REQUISITOS DO SISTEMA
@@ -37,6 +41,48 @@ O banco de dados foi normalizado para refletir com fidelidade as regras de negó
 * **Estrutura de Tarefas e Recursos:** Decomposição de projetos em atividades padronizadas e mapeamento de recursos físicos (softwares, frotas, insumos) vinculados.
 * **Matriz de Custo por Hora:** Registro histórico de cargos e ocupações com seus respectivos valores de hora/trabalho, viabilizando o cálculo retroativo de custos operacionais mesmo diante de reajustes salariais.
 * **Apontamento de Timesheet:** Rastreabilidade fina de intervalos de tempo trabalhados, documentando o momento exato de início e término de cada atividade por colaborador.
+
+---
+
+## 📐 MODELO LÓGICO E DICIONÁRIO DE DADOS
+
+O banco de dados foi normalizado e estruturado para garantir a integridade referencial através de 7 tabelas interligadas. Abaixo está a especificação da arquitetura das tabelas mapeadas no diagrama:
+
+<p align="center">
+  <img src="./images/Projest-Modelo Logico.jpg" alt="Modelo Lógico do Banco de Dados - Projest" width="900">
+</p>
+
+### 🗂️ Estrutura das Tabelas (Esquema Relacional)
+
+*   **CLIENTES:** Armazena o cadastro básico de clientes contratantes.
+    *   `ID_CLIENTE` (PK, INT, NOT NULL)
+    *   `NOME` (VARCHAR(50), NOT NULL), `ENDERECO` (VARCHAR(50)), `EMAIL` (VARCHAR(50))
+*   **PROJETOS:** Centraliza os escopos, orçamentos e gerentes responsáveis.
+    *   `ID_PROJETO` (PK, INT, NOT NULL)
+    *   `NOME` (VARCHAR(50), NOT NULL), `VALOR_ORCADO` (DECIMAL(10,2)), `ANDAMENTO` (DECIMAL(5,4))
+    *   `ID_CLIENTE` (FK vinculada a CLIENTES)
+    *   `ID_GERENTE` (FK vinculada a PESSOAS, definindo o líder do projeto)
+*   **TAREFAS:** Catálogo padronizado de atividades operacionais da empresa.
+    *   `ID_TAREFA` (PK, INT, NOT NULL)
+    *   `NOME` (VARCHAR(50), NOT NULL)
+*   **CARGOS:** Matriz de custo-hora baseada na senioridade ou função jurídica.
+    *   `ID_CARGO` (PK, INT, NOT NULL)
+    *   `NOME` (VARCHAR(50), NOT NULL), `VALOR_HORA` (DECIMAL(5,2), NOT NULL)
+*   **PESSOAS:** Cadastro de colaboradores vinculados à organização.
+    *   `ID_PESSOA` (PK, INT, NOT NULL)
+    *   `NOME` (VARCHAR(20), NOT NULL), `SOBRENOME` (VARCHAR(20), NOT NULL), `EMAIL` (VARCHAR(100))
+    *   `ID_CARGO` (FK vinculada a CARGOS, amarrando o custo financeiro ao profissional)
+*   **USO_RH (Timesheet):** Tabela de junção de alta cardinalidade para apontamento de horas com precisão temporal.
+    *   `ID_USO_RH` (PK, INT, NOT NULL)
+    *   `HORA_INICIO` (TIMESTAMP, NOT NULL), `HORA_FIM` (TIMESTAMP, NOT NULL)
+    *   `ID_TAREFA` (FK), `ID_PESSOA` (FK), `ID_PROJETO` (FK)
+*   **USO_RF:** Controle de alocação de insumos físicos (softwares, frotas, licenças) em cada projeto.
+    *   `ID_USO_RF` (PK, INT, NOT NULL)
+    *   `QUANTIDADE` (DECIMAL(6,2))
+    *   `ID_TAREFA` (FK), `ID_PROJETO` (FK), `ID_RF` (FK)
+*   **RECURSOS_FISICOS:** Cadastro técnico de insumos materiais e operacionais.
+    *   `ID_RF` (PK, INT, NOT NULL)
+    *   `NOME` (VARCHAR(50), NOT NULL), `UNIDADE` (VARCHAR(10)), `CUSTO_UNITARIO` (DECIMAL(6,2)), `DATA_RF` (DATE)
 
 ---
 
